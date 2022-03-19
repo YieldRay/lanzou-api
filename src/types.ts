@@ -59,23 +59,23 @@ interface response<info, text> {
     text: text;
 }
 
+type anyResp = response<any, any>;
+
 type uploadFileResp = response<string, uploadFile[]>;
-type listFileResp = response<any[], listFile[]>;
-type listFolderResp = response<any[], listFolder[]>;
+type listFileResp = response<any[], listFile[]>; // 目前蓝奏云返回的是空数组
+type listFolderResp = response<any[], listFolder[]>; // 目前蓝奏云返回的是空数组
 type infoFileResp = response<infoFile, null>;
 type infoFolderResp = response<infoFolder, null>;
 
-type deleteResp = response<string, null>; // {zt: 1, info: '已删除', text: null}
-type renameResp = response<string, null>; // {zt: 1, info: "修改成功", text: null}
+type operateResp = response<string, null>; // {zt: 1, info: '已删除/...', text: null}
 type createFolderResp = response<string, string>; // {zt: 1, info: "创建成功", text: "5000111"} // 5000111是folder_id，文件夹名字可以重复
-
 type passwordResp = response<string, number>; // {zt: 1, info: "设置/修改成功", text: 1} // 1有密码，0没有密码
 
 type simpleFolder = { folder_name: string; foldr_id: string };
 type moveFileTargetResp = response<simpleFolder[], null>;
 type moveFileActionResp = response<string, null>; // {zt: 1, info: "移动成功", text: null}
 
-interface downloadInfo {
+interface shareInfo {
     title: string;
     size: string;
     time: string;
@@ -83,35 +83,24 @@ interface downloadInfo {
     system: string;
     description: string;
 }
-interface normalDownloadInfo extends downloadInfo {
-    encryptPageURL: string;
-}
-interface passwordDownloadInfo extends downloadInfo {
-    encryptBody: string;
-}
 
-interface downloadResp {
-    zt: 0 | 1;
-    dom: string;
-    url: string;
-    inf: number;
-    link: string;
-}
+type shareResp = response<shareInfo | null, Error | null>;
+// {zt: 0|1, info: 成功数据|null, text: null|Error}
+type linkResp = response<string | null, Error | null>;
 
 export {
-    response,
+    anyResp,
     uploadFileResp,
     createFolderResp,
     listFileResp,
-    renameResp,
     listFolderResp,
     infoFileResp,
     infoFolderResp,
-    deleteResp,
+    operateResp,
     moveFileTargetResp,
     moveFileActionResp,
     passwordResp,
-    normalDownloadInfo,
-    passwordDownloadInfo,
-    downloadResp,
+    shareResp,
+    shareInfo,
+    linkResp,
 };
