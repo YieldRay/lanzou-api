@@ -1,0 +1,23 @@
+{
+  "type": "module",
+  "dependencies": {
+    "form-data": "^4.0.0",
+    "node-fetch": "^2.6.7"
+  },
+  "devDependencies": {
+    "@types/node": "^17.0.21",
+    "typedoc": "^0.22.13"
+  },
+  "name": "lanzou-api",
+  "version": "1.0.0",
+  "main": "lanzou.ts",
+  "scripts": {
+    "test": "node test.js",
+    "build": "tsc",
+    "doc": "typedoc src/lanzou.ts src/types.ts --out ./doc"
+  },
+  "keywords": [],
+  "author": "YieldRay",
+  "license": "ISC",
+  "description": "Lanzou API"
+}
