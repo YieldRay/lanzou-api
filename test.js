@@ -7,4 +7,4 @@ lanzouCookie
 const lanzou = new LanzouAPI(cookie);
 // lanzou.uploadFile("redis-6.0.6.tar.gz").then(console.log);
 // lanzou.getDownloadLinkWithPassword("https://upload.lanzouj.com/ihnRj01olr6f", "passwd").then(console.log);
-lanzou.getDownloadLink("https://upload.lanzouj.com/iYA4q01oui7g").then(console.log);
+LanzouAPI.getDownloadLink("https://upload.lanzouj.com/iYA4q01oui7g").then(console.log);

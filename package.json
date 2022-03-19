@@ -1,13 +1,5 @@
 {
   "type": "module",
-  "dependencies": {
-    "form-data": "^4.0.0",
-    "node-fetch": "^2.6.7"
-  },
-  "devDependencies": {
-    "@types/node": "^17.0.21",
-    "typedoc": "^0.22.13"
-  },
   "name": "lanzou-api",
   "version": "1.0.0",
   "main": "lanzou.ts",
@@ -19,5 +11,21 @@
   "keywords": [],
   "author": "YieldRay",
   "license": "ISC",
-  "description": "Lanzou API"
+  "description": "Lanzou API",
+  "dependencies": {
+    "form-data": "^4.0.0",
+    "node-fetch": "^2.6.7"
+  },
+  "devDependencies": {
+    "@types/node": "^17.0.21",
+    "typedoc": "^0.22.13"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/YieldRay/lanzou-api.git"
+  },
+  "bugs": {
+    "url": "https://github.com/YieldRay/lanzou-api/issues"
+  },
+  "homepage": "https://github.com/YieldRay/lanzou-api#readme"
 }

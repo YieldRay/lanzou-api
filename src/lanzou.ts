@@ -31,7 +31,7 @@ class LanzouAPI {
     /**
      * @param link 此函数内部使用，获取实际下载链接
      */
-    protected async download(link) {
+    static async download(link) {
         return await (fetch as fetch)(link, {
             headers: {
                 accept: "*/*",
@@ -177,7 +177,7 @@ class LanzouAPI {
      * @description 获取分享文件信息，暂时只实现了普通分享链接
      * @param shareURL 蓝奏云分享链接
      */
-    async getDownloadInfo(shareURL: string): Promise<normalDownloadInfo> {
+    static async getDownloadInfo(shareURL: string): Promise<normalDownloadInfo> {
         const text = await (fetch as fetch)(shareURL).then((res) => res.text());
         const title = text.match(/<title>([^<]+)<\/title>/)[1].replace(" - 蓝奏云", "");
         const size = text.match(/<span class="p7">文件大小：<\/span>([^<]+)<br>/)[1];
@@ -196,7 +196,7 @@ class LanzouAPI {
      * @description 获取文件的下载链接，返回值为一对象，其link属性为真实下载链接
      * @param shareURL 蓝奏云分享链接
      */
-    async getDownloadLink(shareURL: string): Promise<downloadResp> {
+    static async getDownloadLink(shareURL: string): Promise<downloadResp> {
         const { encryptPageURL } = await this.getDownloadInfo(shareURL);
         const inPage = await (fetch as fetch)(encryptPageURL).then((res) => res.text());
         const ajax = await fetchJSON("https://upload.lanzouj.com/ajaxm.php", {
@@ -235,7 +235,7 @@ class LanzouAPI {
      * @description 获取加密文件的信息，注意此函数不需要密码
      * @param shareURL 蓝奏云分享链接
      */
-    async getDownloadInfoWithPassword(shareURL: string): Promise<passwordDownloadInfo> {
+    static async getDownloadInfoWithPassword(shareURL: string): Promise<passwordDownloadInfo> {
         const text = await (fetch as fetch)(shareURL).then((res) => res.text());
         const user = text.match(/<span class="user-name">([^<]+)<\/span>/)[1];
         const time = text.match(/<span class="n_file_infos">([^<]+)<\/span>/)[1];
@@ -250,7 +250,7 @@ class LanzouAPI {
      * @description 获取加密文件的下载链接，返回值为一对象，其link属性为真实下载链接
      * @param shareURL 蓝奏云加密分享链接
      */
-    async getDownloadLinkWithPassword(shareURL: string, password: string): Promise<downloadResp> {
+    static async getDownloadLinkWithPassword(shareURL: string, password: string): Promise<downloadResp> {
         const ajax = await fetchJSON("https://upload.lanzouj.com/ajaxm.php", {
             headers: {
                 "content-type": "application/x-www-form-urlencoded",

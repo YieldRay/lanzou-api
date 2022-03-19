@@ -19,10 +19,11 @@ $ npm run doc # 生成文档
 import LanzouAPI from "./lib/lanzou.js";
 const lanzou = new LanzouAPI(cookie);
 await console.log(lanzou.getFiles());
-await console.log(lanzou.getDownloadLink("https://upload.lanzouj.com/xxxx").link);
+await console.log(LanzouAPI.getDownloadLink("https://upload.lanzouj.com/iYA4q01oui7g").link);
 // ...
 ```
 
 ## 文档
 
-所有 API 参见文档，typedoc 自动生成
+所有 API 参见文档，typedoc 自动生成  
+<https://yieldray.github.io/lanzou-api/>
