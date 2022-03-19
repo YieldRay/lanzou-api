@@ -54,7 +54,7 @@ interface infoFolder extends folder {
 }
 
 interface response<info, text> {
-    zt: number;
+    zt: 0 | 1;
     info: info;
     text: text;
 }
@@ -91,7 +91,7 @@ interface passwordDownloadInfo extends downloadInfo {
 }
 
 interface downloadResp {
-    zt: number;
+    zt: 0 | 1;
     dom: string;
     url: string;
     inf: number;

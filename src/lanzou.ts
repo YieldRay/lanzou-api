@@ -19,6 +19,12 @@ import {
     downloadResp,
 } from "./types";
 type fetch = (input: RequestInfo, init?: RequestInit) => Promise<Response>;
+class LanzouAPIError extends Error {
+    constructor(message: string) {
+        super(message);
+        this.name = "LanzouAPIError";
+    }
+}
 
 class LanzouAPI {
     private cookie: string;
@@ -48,7 +54,11 @@ class LanzouAPI {
             },
             body: null,
             method: "GET",
-        }).then((res) => res.url);
+        })
+            .then((res) => res.url)
+            .catch((e) => {
+                throw new LanzouAPIError(e.message);
+            });
     }
     async fetchLanzou(bodyObj) {
         return fetchJSON("https://pc.woozooo.com/doupload.php", {
@@ -149,10 +159,11 @@ class LanzouAPI {
         });
     }
     /**
-     * @param shownames 访问密码
+     * @param shownames 访问密码，长度在2-6之间
      * @param shows 是否需要密码，1需要，0不需要，上传的文件默认不需要密码，非会员用户无法取消密码
      */
     async setFilePassword(file_id: number, shownames: string, shows: 0 | 1): Promise<passwordResp> {
+        if (shows && (shownames.length < 2 || shownames.length > 6)) throw new LanzouAPIError("密码长度必须在2-6之间");
         return await this.fetchLanzou({
             task: 23,
             file_id,
@@ -162,10 +173,11 @@ class LanzouAPI {
     }
 
     /**
-     * @param shownames 访问密码
+     * @param shownames 访问密码，长度在2-6之间
      * @param shows 是否需要密码，1需要，0不需要，只有会员才能设置为不需要
      */
     async setFolderPassword(folder_id: number, shownames: string, shows: 0 | 1): Promise<passwordResp> {
+        if (shows && (shownames.length < 2 || shownames.length > 6)) throw new LanzouAPIError("密码长度必须在2-6之间");
         return await this.fetchLanzou({
             task: 16,
             folder_id,
@@ -178,19 +190,26 @@ class LanzouAPI {
      * @param shareURL 蓝奏云分享链接
      */
     static async getDownloadInfo(shareURL: string): Promise<normalDownloadInfo> {
-        const text = await (fetch as fetch)(shareURL).then((res) => res.text());
-        const title = text.match(/<title>([^<]+)<\/title>/)[1].replace(" - 蓝奏云", "");
-        const size = text.match(/<span class="p7">文件大小：<\/span>([^<]+)<br>/)[1];
-        const [time, user] = text
-            .match(
-                /<span class="p7">上传时间：<\/span>([^<]+)<br><span class="p7">分享用户：<\/span><font>([^<]+)<\/font><br>/
-            )
-            .slice(1);
-        const system = text.match(/<span class="p7">运行系统：<\/span>([^<]+)<br>/)[1];
-        const description = text.match(/<span class="p7">文件描述([^<]+)<\/span><br>/)[1].slice(1);
-        const encryptPage = text.match(/<iframe class="ifr2" name="(?:\d{2,})" src="(\/fn\?[^"]+)"/)[1];
-        const encryptPageURL = new URL(shareURL).origin + encryptPage;
-        return { title, size, time, user, system, description, encryptPageURL };
+        const text = await (fetch as fetch)(shareURL)
+            .then((res) => res.text())
+            .catch((e) => {
+                throw new LanzouAPIError("获取分享页面失败 " + e.message);
+            });
+        try {
+            const title = text.match(/<title>([^<]+)<\/title>/)[1].replace(" - 蓝奏云", "");
+            const size = text.match(/<span class="p7">文件大小：<\/span>([^<]+)<br>/)[1];
+            const time = text.match(/<span class="p7">上传时间：<\/span>([^<]+)<br>/)?.[1] || "unknown";
+            const user = text.match(/<span class="p7">分享用户：<\/span><font>([^<]+)<\/font><br>/)[1];
+            const system = text.match(/<span class="p7">运行系统：<\/span>([^<]+)<br>/)[1];
+            // <span class="p7">文件描述：</span><br>
+            //   </td>
+            // const description 这个有点难搞，先不实现
+            const encryptPage = text.match(/<iframe class="ifr2" name="(?:\d{2,})" src="(\/fn\?[^"]+)"/)[1];
+            const encryptPageURL = new URL(shareURL).origin + encryptPage;
+            return { title, size, time, user, system, description: "", encryptPageURL };
+        } catch (e) {
+            throw new LanzouAPIError("获取文件信息失败 " + e.message);
+        }
     }
     /**
      * @description 获取文件的下载链接，返回值为一对象，其link属性为真实下载链接
@@ -236,14 +255,25 @@ class LanzouAPI {
      * @param shareURL 蓝奏云分享链接
      */
     static async getDownloadInfoWithPassword(shareURL: string): Promise<passwordDownloadInfo> {
-        const text = await (fetch as fetch)(shareURL).then((res) => res.text());
-        const user = text.match(/<span class="user-name">([^<]+)<\/span>/)[1];
-        const time = text.match(/<span class="n_file_infos">([^<]+)<\/span>/)[1];
-        const system = text.match(/<span class="n_file_infos">([^<]+)<\/span>/)[1];
-        const size = text.match(/<div class="n_filesize">大小：([^<]+)<\/div>/)[1];
-        const description = text.match(/<div class="n_box_des">([^<]+)<\/div>/)[1];
-        const encryptBody = text.match(/data\W+:\W+'(action=downprocess&sign=[^&]+&p=)'/)[1];
-        return { title: "unknown", size, time, user, system, description, encryptBody };
+        const text = await (fetch as fetch)(shareURL)
+            .then((res) => res.text())
+            .catch((e) => {
+                throw new LanzouAPIError("获取分享页面失败 " + e.message);
+            });
+        try {
+            const user = text.match(/<span class="user-name">([^<]+)<\/span>/)[1];
+            // <div class="n_file_info"><span class="n_file_infos">3 小时前</span> <span class="n_file_infos">Win桌面</span></div>
+            const [, time, system] =
+                text.match(
+                    /<div class="n_file_info"><span class="n_file_infos">([^<]+)<\/span> <span class="n_file_infos">([^<]+)<\/span>/
+                ) || new Array(3).fill("unknown");
+            const size = text.match(/<div class="n_filesize">大小：([^<]+)<\/div>/)[1];
+            // const description = text.match(/<div class="n_box_des">([^<]+)<\/div>/)[1];
+            const encryptBody = text.match(/data\W+:\W+'(action=downprocess&sign=[^&]+&p=)'/)[1];
+            return { title: "unknown", size, time, user, system, description: "", encryptBody };
+        } catch (e) {
+            throw new LanzouAPIError("获取文件信息失败 " + e.message);
+        }
     }
 
     /**
@@ -310,11 +340,11 @@ async function fetchJSON(...args: [RequestInfo, RequestInit?]) {
     if (resp.ok) {
         return resp.json();
     } else {
-        return null;
+        throw new LanzouAPIError("网络请求错误 " + resp.statusText);
     }
 }
 
-function objToURL(obj): string {
+function objToURL(obj: Object): string {
     const sp = new URLSearchParams();
     for (let i in obj) {
         sp.append(i, obj[i]);
