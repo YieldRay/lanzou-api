@@ -28,7 +28,7 @@ async function fetchJSON(...args: [RequestInfo, RequestInit?]): Promise<any> {
     }
 }
 
-function objToURL(obj: Object): string {
+function objToURL(obj: object): string {
     const sp = new URLSearchParams();
     for (let i in obj) {
         sp.append(i, obj[i]);

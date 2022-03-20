@@ -64,8 +64,8 @@ type anyResp = response<any, any>;
 type uploadFileResp = response<string, uploadFile[]>;
 type listFileResp = response<any[], listFile[]>; // 目前蓝奏云返回的是空数组
 type listFolderResp = response<any[], listFolder[]>; // 目前蓝奏云返回的是空数组
-type infoFileResp = response<infoFile, null>;
-type infoFolderResp = response<infoFolder, null>;
+type shareFileResp = response<infoFile, null>;
+type shareFolderResp = response<infoFolder, null>;
 
 type operateResp = response<string, null>; // {zt: 1, info: '已删除/...', text: null}
 type createFolderResp = response<string, string>; // {zt: 1, info: "创建成功", text: "5000111"} // 5000111是folder_id，文件夹名字可以重复
@@ -95,8 +95,8 @@ export {
     createFolderResp,
     listFileResp,
     listFolderResp,
-    infoFileResp,
-    infoFolderResp,
+    shareFileResp,
+    shareFolderResp,
     operateResp,
     moveFileTargetResp,
     moveFileActionResp,
