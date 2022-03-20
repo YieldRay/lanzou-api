@@ -24,7 +24,7 @@ interface uploadFile extends file {
     f_id: string;
 }
 
-interface infoFile {
+interface shareFile {
     pwd: string;
     onof: string;
     f_id: string;
@@ -45,7 +45,7 @@ interface listFolder extends folder {
     folder_des: string;
 }
 
-interface infoFolder extends folder {
+interface shareFolder extends folder {
     des: string;
     pwd: string;
     taoc: string;
@@ -64,16 +64,16 @@ type anyResp = response<any, any>;
 type uploadFileResp = response<string, uploadFile[]>;
 type listFileResp = response<any[], listFile[]>; // 目前蓝奏云返回的是空数组
 type listFolderResp = response<any[], listFolder[]>; // 目前蓝奏云返回的是空数组
-type shareFileResp = response<infoFile, null>;
-type shareFolderResp = response<infoFolder, null>;
+type shareFileResp = response<shareFile, null>;
+type shareFolderResp = response<shareFolder, null>;
 
-type operateResp = response<string, null>; // {zt: 1, info: '已删除/...', text: null}
-type createFolderResp = response<string, string>; // {zt: 1, info: "创建成功", text: "5000111"} // 5000111是folder_id，文件夹名字可以重复
-type passwordResp = response<string, number>; // {zt: 1, info: "设置/修改成功", text: 1} // 1有密码，0没有密码
+type operateResp = response<string, null>;
+type createFolderResp = response<string, string>;
+type passwordResp = response<string, number>;
 
 type simpleFolder = { folder_name: string; foldr_id: string };
 type moveFileTargetResp = response<simpleFolder[], null>;
-type moveFileActionResp = response<string, null>; // {zt: 1, info: "移动成功", text: null}
+type moveFileActionResp = response<string, null>;
 
 interface shareInfo {
     title: string;
@@ -89,6 +89,11 @@ type shareResp = response<shareInfo | null, Error | null>;
 type linkResp = response<string | null, Error | null>;
 
 export {
+    listFile,
+    shareFile,
+    uploadFile,
+    listFolder,
+    shareFolder,
     response,
     anyResp,
     uploadFileResp,

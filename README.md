@@ -23,8 +23,14 @@ $ npm run doc # 生成文档
 ```js
 import LanzouAPI from "./lib/lanzou.js";
 LanzouAPI.queryShareLink("https://xxxxxx.lanzouj.com/xxxxxx", "passwd").then(console.log);
-const lanzou = new LanzouAPI(cookie);
-lanzou.getFolders().then(console.log);
+const lanzou = LanzouAPI.of(cookie); // new LanzouAPI(cookie)
+lanzou.getFolders().then(({ zt, info, text }) => {
+    if (zt === 1) {
+        console.log(info);
+    } else {
+        console.error(info);
+    }
+});
 // more...
 ```
 
@@ -47,7 +53,7 @@ interface {
 失败时可以通过检测 text 来获取程序捕获的异常
 
 ```js
-const { zt, info, text } = await api;
+const { zt, info, text } = await lanzou.getFolders();
 if (zt === 1) {
     // success
 } else {

@@ -85,7 +85,7 @@ class LanzouAPI {
      * @description 按页获取指定目录文件
      * @param folder_id 目录id，默认为根目录
      * @param pg 页数，默认为1
-     * @returns {"zt":1,"info":[],"text": [{},{},...]}
+     * @returns 成功值 {"zt":1,"info":[],"text": [{},{},...]}
      */
     async getFiles(folder_id = -1, pg = 1): Promise<listFileResp> {
         if (!folder_id) folder_id = -1;
@@ -100,7 +100,7 @@ class LanzouAPI {
      * @description 按页获取指定目录文件夹
      * @param folder_id 目录id，默认为根目录
      * @param pg 页数，默认为1
-     * @returns {"zt":1,"info": [{},{},...],"text":null}
+     * @returns 成功值 {"zt":1,"info": [{},{},...],"text":null}
      */
     async getFolders(folder_id = -1, pg = 1): Promise<listFolderResp> {
         if (!folder_id) folder_id = -1;
@@ -114,7 +114,7 @@ class LanzouAPI {
     /**
      * @description 获取文件的分享地址
      * @param file_id 文件id
-     * @returns {"zt":1,"info":{"pwd":"访问密码","onof":"0","f_id":"ii5ZQ01qmpqb","taoc":"","is_newd":"https:\/\/upload.lanzouj.com"},"text":null}
+     * @returns 成功值 {"zt":1,"info":{"pwd":"访问密码","onof":"0","f_id":"ii5ZQ01qmpqb","taoc":"","is_newd":"https:\/\/upload.lanzouj.com"},"text":null}
      */
     async shareFile(file_id: number): Promise<shareFileResp> {
         return await this.fetchLanzou({
@@ -126,7 +126,7 @@ class LanzouAPI {
     /**
      * @description 获取文件夹的分享地址
      * @param folder_id 文件夹id
-     * @returns {"zt":1,"info":{"name":"文件夹名称","des":"文件夹描述","pwd":"访问密码","onof":"1","taoc":"","is_newd":"https:\/\/upload.lanzouj.com","new_url":"https:\/\/upload.lanzouj.com\/xxxx"},"text":null}
+     * @returns 成功值 {"zt":1,"info":{"name":"文件夹名称","des":"文件夹描述","pwd":"访问密码","onof":"1","taoc":"","is_newd":"https:\/\/upload.lanzouj.com","new_url":"https:\/\/upload.lanzouj.com\/xxxx"},"text":null}
      */
     async shareFolder(folder_id: number): Promise<shareFolderResp> {
         return await this.fetchLanzou({
@@ -138,7 +138,7 @@ class LanzouAPI {
     /**
      * @description 删除指定文件
      * @param file_id 文件id
-     * @returns {"zt":1,"info":"已删除","text":null}
+     * @returns 成功值 {"zt":1,"info":"已删除","text":null}
      */
     async deleteFile(file_id: number): Promise<operateResp> {
         return await this.fetchLanzou({
@@ -150,7 +150,7 @@ class LanzouAPI {
     /**
      * @description 删除指定文件夹，注意蓝奏云只能删除没有子文件夹的文件夹
      * @param folder_id 文件夹id
-     * @returns {"zt":1,"info":"删除成功","text":null}
+     * @returns 成功值 {"zt":1,"info":"删除成功","text":null}
      */
     async deleteFolder(folder_id: number): Promise<operateResp> {
         return await this.fetchLanzou({
@@ -164,7 +164,7 @@ class LanzouAPI {
      * @param parent_id 父目录id，默认为根目录
      * @param folder_name 文件夹名称，默认为 "新建文件夹"
      * @param folder_description 文件夹描述，默认为空
-     * @returns {"zt":1,"info":"创建成功","text":"生成的文件夹id字符串"}
+     * @returns 成功值 {"zt":1,"info":"创建成功","text":"生成的文件夹id字符串"}
      */
     async createFolder(
         parent_id: number = 0,
@@ -185,7 +185,7 @@ class LanzouAPI {
      * @param folder_id 文件夹id
      * @param folder_name 重命名的文件夹名称，默认为 "新建文件夹"
      * @param folder_description 文件夹描述，默认为空
-     * @returns {"zt":1,"info":"修改成功","text":null}
+     * @returns 成功值 {"zt":1,"info":"修改成功","text":null}
      */
     async renameFolder(
         folder_id: number,
@@ -217,7 +217,7 @@ class LanzouAPI {
      * @description 只有会员才能重命名文件。
      * @param file_id 文件id
      * @param file_name 新的文件名称
-     * @returns {"zt":0,"info":"此功能仅会员使用，请先开通会员","text":null}
+     * @returns 失败值 {"zt":0,"info":"此功能仅会员使用，请先开通会员","text":null}
      */
     async renameFile(file_id: number, file_name: string): Promise<operateResp> {
         return await this.fetchLanzou({
@@ -230,7 +230,7 @@ class LanzouAPI {
     /**
      * @description 先通过moveFileTarget找到指定文件夹，再通过moveFileAction移动文件到指定的文件夹
      * @param file_id 文件id
-     * @returns {"zt":1,"info":[{folder_name:"name",folder_id:"id"},...],"text":null}
+     * @returns 成功值 {"zt":1,"info":[{folder_name:"name",folder_id:"id"},...],"text":null}
      */
     async moveFileTarget(file_id: number): Promise<moveFileTargetResp> {
         return await this.fetchLanzou({
@@ -242,7 +242,7 @@ class LanzouAPI {
      * @description 先通过moveFileTarget找到指定文件夹，再通过moveFileAction移动文件到指定的文件夹
      * @param file_id 文件id
      * @param folder_id 目标文件夹id
-     * @returns {"zt":1,"info":"移动成功","text":null}
+     * @returns 成功值 {"zt":1,"info":"移动成功","text":null}
      */
     async moveFileAction(file_id: number, folder_id: number): Promise<moveFileActionResp> {
         return await this.fetchLanzou({
@@ -255,7 +255,7 @@ class LanzouAPI {
      * @description 设置文件描述。如果之前已经有了就不能设置为空
      * @param file_id 文件id
      * @param desc 文件描述
-     * @returns {"zt":1,"info":"设置成功","text":null}
+     * @returns 成功值 {"zt":1,"info":"设置成功","text":null}
      */
     async setFileDescription(file_id: number, desc: string = ""): Promise<operateResp> {
         return await this.fetchLanzou({
@@ -269,8 +269,7 @@ class LanzouAPI {
      * @param file_id 文件id
      * @param shows 是否需要密码，1需要，0不需要，如果需要密码但没有传入shownames则自动生成。非会员用户无法取消密码（即传入0无效）
      * @param shownames 访问密码，长度在2-6之间，shows为0时无需传入
-     * @returns 失败值，注意zt原本为null，但api将其设置为0以保证一致性 {"zt":null,"info":"此功能仅会员使用（个人中心 - 会员个性化）","text":null}
-     * @returns 成功值 {"zt":1,"info":"设置成功","text":1}
+     * @returns 成功值 {"zt":1,"info":"设置/修改成功","text":0无密码/1有密码} 失败值，注意zt原本为null，但api将其设置为0以保证一致性 {"zt":null,"info":"此功能仅会员使用（个人中心 - 会员个性化）","text":null}
      */
     async setFilePassword(file_id: number, shows: 0 | 1, shownames?: string): Promise<passwordResp> {
         if (shows) {
@@ -295,8 +294,7 @@ class LanzouAPI {
      * @param folder_id 文件夹id
      * @param shows 是否需要密码，1需要，0不需要，非会员用户无法取消密码（即传入0无效）
      * @param shownames 访问密码，长度在2-6之间
-     * @returns 失败值，注意zt原本为null，但api将其设置为0以保证一致性 {"zt":null,"info":"此功能仅会员使用（个人中心 - 会员个性化）","text":null}
-     * @returns 成功值 {"zt":1,"info":"修改成功","text":1}
+     * @returns 成功值 {"zt":1,"info":"修改成功","text":1} 失败值，注意zt原本为null，但api将其设置为0以保证一致性 {"zt":null,"info":"此功能仅会员使用（个人中心 - 会员个性化）","text":null}
      */
     async setFolderPassword(folder_id: number, shows: 0 | 1, shownames?: string): Promise<passwordResp> {
         if (shows && shownames && (shownames.length < 2 || shownames.length > 6))
@@ -313,7 +311,7 @@ class LanzouAPI {
      * @description 上传本地文件。注意文件上传受到限制，普通用户只能上传100M以下的文件，文件后缀也受限制。
      * @param folder_id 存放的文件夹id，默认为根目录
      * @param filepath 文件路径
-     * @returns {"zt":1,"info":"上传成功","text":[{"icon":"zip","id":"65107976","f_id":"iMnMi01qglvg","name_all":"test.zip","name":"test.zip","size":"100.0 M","time":"0 秒前","downs":"0","onof":"0","is_newd":"https://upload.lanzouj.com"}]}
+     * @returns 成功值 {"zt":1,"info":"上传成功","text":[{"icon":"zip","id":"65107976","f_id":"iMnMi01qglvg","name_all":"test.zip","name":"test.zip","size":"100.0 M","time":"0 秒前","downs":"0","onof":"0","is_newd":"https://upload.lanzouj.com"}]}
      */
     async uploadFile(folder_id = -1, filepath: string): Promise<uploadFileResp> {
         try {
@@ -347,7 +345,7 @@ class LanzouAPI {
      * @description 获取蓝奏云文件分享页信息
      * @param shareURL 蓝奏云文件分享页链接
      * @param password 分享密码，传入*任意*密码时将查询加密文件分享页信息，否则查询非加密文件分享页信息
-     * @returns {"zt":1,"info":{title,size,time,user,system,description},"text":null}
+     * @returns 成功值 {"zt":1,"info":{title,size,time,user,system,description},"text":null}
      */
     static async queryShareInfo(shareURL: string, password?: string): Promise<shareResp> {
         if (password) {
@@ -361,7 +359,7 @@ class LanzouAPI {
      * @description 获取蓝奏云文件分享的实际下载链接
      * @param shareURL 蓝奏云文件分享页链接
      * @param password 分享密码，传入正确密码时将查询加密文件分享页信息，否则查询非加密文件分享页信息
-     * @returns {"zt":1,"info":"真实下载链接","text":null}
+     * @returns 成功值 {"zt":1,"info":"真实下载链接","text":null}
      */
     static async queryShareLink(shareURL: string, password?: string): Promise<linkResp> {
         if (password) {
