@@ -1,7 +1,9 @@
 import { fetchJSON, objToURL, LanzouAPIError } from "./util.js";
 import { getPasswordShareInfo, getPasswordShareLink, getShareLink, getShareInfo } from "./util.js";
-import { getBasename, createReadStream, isFileExists } from "./util.js";
+import { getBasename, isFileExists } from "./util.js";
+import { allowList, headersObj } from "./data.js";
 import { FormData, fileFromSync } from "node-fetch";
+// 实测 fileFromSync 性能比 fs.createReadStream(from-data库) 更好
 import {
     anyResp,
     uploadFileResp,
@@ -20,11 +22,34 @@ import {
 
 class LanzouAPI {
     private cookie: string;
+
+    public static allowList = allowList;
+
+    public static shareLinkRegExp = /https?:\/\/[A-Za-z0-9]+\.lanzou\w\.com\/[A-Za-z0-9]+/;
+
     /**
      * @param cookie 在 https://pc.woozooo.com/mydisk.php 获取 cookie，有效期约两天
      */
     constructor(cookie: string) {
         this.cookie = cookie;
+    }
+
+    /**
+     * @description 判断是否为蓝奏云文件分享页链接
+     */
+    static isShareLink(url: string): boolean {
+        return LanzouAPI.shareLinkRegExp.test(url);
+    }
+
+    /**
+     * @description 生成随机分享密码
+     * @param length 密码长度
+     */
+    static genRandomPassword(length: number = 4): string {
+        const possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+        let text = "";
+        for (let i = 0; i < length; i++) text += possible.charAt(Math.floor(Math.random() * possible.length));
+        return text;
     }
 
     private async fetchLanzou(bodyObj): Promise<anyResp> {
@@ -35,6 +60,7 @@ class LanzouAPI {
                     "cache-control": "no-cache",
                     "content-type": "application/x-www-form-urlencoded; charset=UTF-8",
                     cookie: this.cookie,
+                    ...headersObj,
                 },
                 body: objToURL(bodyObj),
                 method: "POST",
@@ -43,12 +69,14 @@ class LanzouAPI {
             return { zt: 0, info: e, text: e.message };
         }
     }
+
     /**
      * @description 按页获取指定目录文件
      * @param folder_id 目录id，默认为根目录
      * @param pg 页数，默认为1
      */
     async getFiles(folder_id = -1, pg = 1): Promise<listFileResp> {
+        if (!folder_id) folder_id = -1;
         return await this.fetchLanzou({
             task: 5,
             folder_id,
@@ -62,6 +90,7 @@ class LanzouAPI {
      * @param pg 页数，默认为1
      */
     async getFolders(folder_id = -1, pg = 1): Promise<listFolderResp> {
+        if (!folder_id) folder_id = -1;
         return await this.fetchLanzou({
             task: 47,
             folder_id,
@@ -103,7 +132,7 @@ class LanzouAPI {
     }
 
     /**
-     * @description 删除指定文件夹
+     * @description 删除指定文件夹，注意蓝奏云只能删除没有子文件夹的文件夹
      * @param folder_id 文件夹id
      */
     async deleteFolder(folder_id: number): Promise<operateResp> {
@@ -114,12 +143,17 @@ class LanzouAPI {
     }
 
     /**
-     * @description 创建文件夹
+     * @description 创建文件夹，文件夹名称可以重复
      * @param parent_id 父目录id，默认为根目录
      * @param folder_name 文件夹名称，默认为 "新建文件夹"
      * @param folder_description 文件夹描述，默认为空
      */
-    async createFolder(parent_id = 0, folder_name = "新建文件夹", folder_description = ""): Promise<createFolderResp> {
+    async createFolder(
+        parent_id: number = 0,
+        folder_name: string = "新建文件夹",
+        folder_description: string = ""
+    ): Promise<createFolderResp> {
+        if (!parent_id) parent_id = 0;
         return await this.fetchLanzou({
             task: 2,
             parent_id,
@@ -134,7 +168,11 @@ class LanzouAPI {
      * @param folder_name 重命名的文件夹名称，默认为 "新建文件夹"
      * @param folder_description 文件夹描述，默认为空
      */
-    async renameFolder(folder_id: number, folder_name = "新建文件夹", folder_description = ""): Promise<operateResp> {
+    async renameFolder(
+        folder_id: number,
+        folder_name: string = "新建文件夹",
+        folder_description: string = ""
+    ): Promise<operateResp> {
         return await this.fetchLanzou({
             task: 4,
             folder_id,
@@ -195,7 +233,7 @@ class LanzouAPI {
      * @param file_id 文件id
      * @param desc 文件描述
      */
-    async setFileDescription(file_id: number, desc: string): Promise<operateResp> {
+    async setFileDescription(file_id: number, desc: string = ""): Promise<operateResp> {
         return await this.fetchLanzou({
             task: 11,
             file_id,
@@ -204,12 +242,19 @@ class LanzouAPI {
     }
     /**
      * @description 设置文件是否公开，或设置文件访问密码。上传的文件默认不需要密码，非会员用户无法取消密码
-     * @param shows 是否需要密码，1需要，0不需要，非会员用户无法取消密码（即传入0无效）
+     * @param shows 是否需要密码，1需要，0不需要，如果需要密码但没有传入shownames则自动生成。非会员用户无法取消密码（即传入0无效）
      * @param shownames 访问密码，长度在2-6之间，shows为0时无需传入
      */
     async setFilePassword(file_id: number, shows: 0 | 1, shownames?: string): Promise<passwordResp> {
-        if (shows && shownames && (shownames.length < 2 || shownames.length > 6))
-            throw new LanzouAPIError("密码长度必须在2-6之间");
+        if (shows) {
+            if (shownames) {
+                if (shownames.length < 2 || shownames.length > 6) throw new LanzouAPIError("密码长度必须在2-6之间");
+            } else {
+                shownames = LanzouAPI.genRandomPassword();
+            }
+        } else {
+            shownames = "";
+        }
         return await this.fetchLanzou({
             task: 23,
             file_id,
@@ -235,47 +280,43 @@ class LanzouAPI {
     }
 
     /**
-     * @description 上传本地文件。注意文件上传受到限制，普通用户只能上传100M以下的文件，文件后缀也受限制
+     * @description 上传本地文件。注意文件上传受到限制，普通用户只能上传100M以下的文件，文件后缀也受限制。返回示例：{"zt":1,"info":"上传成功","text":[{"icon":"zip","id":"65107976","f_id":"iMnMi01qglvg","name_all":"test.zip","name":"test.zip","size":"100.0 M","time":"0 秒前","downs":"0","onof":"0","is_newd":"https://upload.lanzouj.com"}]}
      * @param folder_id 文件夹id
      * @param filepath 文件路径
-     * @param filename 文件名，为空时自动通过文件路径获取
      */
     async uploadFile(folder_id = -1, filepath: string): Promise<uploadFileResp> {
-        if (!(await isFileExists(filepath))) {
-            throw new LanzouAPIError(`文件 ${filepath} 不存在`);
+        try {
+            if (!(await isFileExists(filepath))) {
+                throw new LanzouAPIError(`文件 ${filepath} 不存在`);
+            }
+            if (!folder_id) folder_id = -1;
+            const filename = getBasename(filepath);
+            if (!LanzouAPI.allowList.includes(filename.split(".").pop())) {
+                throw new LanzouAPIError("文件类型不允许上传");
+            }
+            const fd = new FormData();
+            fd.append("task", "1");
+            fd.append("ve", "2");
+            fd.append("id", "WU_FILE_0");
+            fd.append("name", filename);
+            fd.append("folder_id_bb_n", String(folder_id));
+            fd.append("upload_file", fileFromSync(filepath));
+            return await (fetchJSON as any)("https://pc.woozooo.com/fileup.php", {
+                headers: {
+                    cookie: this.cookie,
+                },
+                body: fd,
+                method: "POST",
+            });
+        } catch (e) {
+            return { zt: 0, info: e.message, text: e };
         }
-        if (!folder_id) folder_id = -1;
-        const filename = getBasename(filepath);
-        const allowList = `doc,docx,zip,rar,apk,ipa,txt,exe,7z,e,z,ct,ke,cetrainer,db,tar,gz,pdf,w3x
-        epub,mobi,azw,azw3,osk,osz,xpa,cpk,lua,jar,dmg,ppt,pptx,xls,xlsx,mp3
-        ipa,iso,img,gho,ttf,ttc,txf,dwg,bat,imazingapp,dll,crx,xapk,conf
-        deb,rp,rpm,rplib,mobileconfig,appimage,lolgezi,flac
-        cad,hwt,accdb,ce,xmind,enc,bds,bdi,ssf,it`
-            .replace(/\r\n|\r|\n/g, ",")
-            .replace(/ +/g, "")
-            .split(",");
-        if (!allowList.includes(filename.split(".").pop())) {
-            throw new LanzouAPIError("文件类型不允许上传");
-        }
-        const fd = new FormData();
-        fd.append("task", "1");
-        fd.append("ve", "2");
-        fd.append("id", "WU_FILE_0");
-        fd.append("name", filename);
-        fd.append("folder_id_bb_n", String(folder_id));
-        fd.append("upload_file", fileFromSync(filepath));
-        return await (fetchJSON as any)("https://pc.woozooo.com/fileup.php", {
-            headers: {
-                cookie: this.cookie,
-            },
-            body: fd,
-            method: "POST",
-        });
     }
     /**
      * @description 获取蓝奏云文件分享页信息
      * @param shareURL 蓝奏云文件分享页链接
      * @param password 分享密码，传入*任意*密码时将查询加密文件分享页信息，否则查询非加密文件分享页信息
+     * @returns 成功时info属性为文件信息对象
      */
     static async queryShareInfo(shareURL: string, password?: string): Promise<shareResp> {
         if (password) {
@@ -286,9 +327,10 @@ class LanzouAPI {
     }
 
     /**
-     * @description 获取蓝奏云文件分享的实际下载链接，失败时返回空字符串（或非URL）
+     * @description 获取蓝奏云文件分享的实际下载链接
      * @param shareURL 蓝奏云文件分享页链接
      * @param password 分享密码，传入正确密码时将查询加密文件分享页信息，否则查询非加密文件分享页信息
+     * @returns 成功时info属性为实际下载链接
      */
     static async queryShareLink(shareURL: string, password?: string): Promise<linkResp> {
         if (password) {

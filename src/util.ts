@@ -1,5 +1,6 @@
 import fetch from "node-fetch";
 import fs from "fs";
+import { headersObj } from "./data.js";
 import { shareResp, linkResp } from "./types";
 
 class LanzouAPIError extends Error {
@@ -9,7 +10,16 @@ class LanzouAPIError extends Error {
     }
 }
 
-async function fetchJSON(...args: [RequestInfo, RequestInit?]) {
+async function fetchText(...args: [RequestInfo, RequestInit?]): Promise<string> {
+    const resp = await (fetch as any)(...args);
+    if (resp.ok) {
+        return resp.text();
+    } else {
+        throw new LanzouAPIError("网络请求错误 " + resp.statusText);
+    }
+}
+
+async function fetchJSON(...args: [RequestInfo, RequestInit?]): Promise<any> {
     const resp = await (fetch as any)(...args);
     if (resp.ok) {
         return resp.json();
@@ -28,26 +38,14 @@ function objToURL(obj: Object): string {
 
 async function downloadRedirect(link: string): Promise<string> {
     return await (fetch as any)(link, {
-        headers: {
-            accept: "*/*",
-            "accept-language": "zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6",
-            "cache-control": "no-cache",
-            pragma: "no-cache",
-            "sec-ch-ua": '" Not A;Brand";v="99", "Chromium";v="99", "Microsoft Edge";v="99"',
-            "sec-ch-ua-mobile": "?0",
-            "sec-ch-ua-platform": '"Windows"',
-            "sec-fetch-dest": "empty",
-            "sec-fetch-mode": "cors",
-            "sec-fetch-site": "cross-site",
-            "Referrer-Policy": "strict-origin-when-cross-origin",
-        },
+        headers: headersObj,
         body: null,
         method: "GET",
     }).then((res) => res.url);
 }
 
 async function getShareInfo(shareURL: string): Promise<shareResp> {
-    const text = await (fetch as any)(shareURL).then((res) => res.text());
+    const text = await fetchText(shareURL);
     try {
         const title = text.match(/<title>([^<]+)<\/title>/)[1].replace(" - 蓝奏云", "");
         const size = text.match(/<span class="p7">文件大小：<\/span>([^<]+)<br>/)[1];
@@ -65,27 +63,17 @@ async function getShareInfo(shareURL: string): Promise<shareResp> {
 
 async function getShareLink(shareURL: string): Promise<linkResp> {
     try {
-        const text = await (fetch as any)(shareURL).then((res) => res.text());
+        const text = await fetchText(shareURL);
         const referer =
             new URL(shareURL).origin + text.match(/<iframe class="ifr2" name="(?:\d{2,})" src="(\/fn\?[^"]+)"/)[1];
-        const encryptPage = await (fetch as any)(referer).then((res) => res.text());
+        const encryptPage = await fetchText(referer);
         const ajax = await fetchJSON("https://upload.lanzouj.com/ajaxm.php", {
             headers: {
-                accept: "application/json, text/javascript, */*",
-                "accept-language": "zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6",
-                "cache-control": "no-cache",
                 "content-type": "application/x-www-form-urlencoded",
-                pragma: "no-cache",
-                "sec-ch-ua": '" Not A;Brand";v="99", "Chromium";v="99", "Microsoft Edge";v="99"',
-                "sec-ch-ua-mobile": "?0",
-                "sec-ch-ua-platform": '"Windows"',
-                "sec-fetch-dest": "empty",
-                "sec-fetch-mode": "cors",
-                "sec-fetch-site": "same-origin",
-                "x-requested-with": "XMLHttpRequest",
+                accept: "application/json, text/javascript, */*",
                 cookie: "codelen=1; pc_ad1=1",
                 referer,
-                "Referrer-Policy": "strict-origin-when-cross-origin",
+                ...headersObj,
             },
             body: objToURL({
                 action: "downprocess",
@@ -105,16 +93,17 @@ async function getShareLink(shareURL: string): Promise<linkResp> {
 }
 
 async function getPasswordShareInfo(shareURL: string, password?: string): Promise<shareResp> {
-    const text = await (fetch as any)(shareURL).then((res) => res.text());
     try {
+        const text = await fetchText(shareURL);
+        if (text.includes("来晚啦...文件取消分享了")) {
+            throw new LanzouAPIError("文件已取消分享");
+        }
         const user = text.match(/<span class="user-name">([^<]+)<\/span>/)[1];
-        // <div class="n_file_info"><span class="n_file_infos">3 小时前</span> <span class="n_file_infos">Win桌面</span></div>
         const [, time, system] =
             text.match(
                 /<div class="n_file_info"><span class="n_file_infos">([^<]+)<\/span> <span class="n_file_infos">([^<]+)<\/span>/
             ) || new Array(3).fill("unknown");
         const size = text.match(/<div class="n_filesize">大小：([^<]+)<\/div>/)[1];
-        // const description = text.match(/<div class="n_box_des">([^<]+)<\/div>/)[1];
         return { zt: 1, info: { title: "unknown", size, time, user, system, description: "" }, text: null };
     } catch (e) {
         return { zt: 0, info: e.message, text: e };
@@ -124,17 +113,21 @@ async function getPasswordShareInfo(shareURL: string, password?: string): Promis
 async function getPasswordShareLink(shareURL: string, password: string): Promise<linkResp> {
     let ajax: any;
     try {
-        const text = await (fetch as any)(shareURL).then((res) => res.text());
+        const text = await fetchText(shareURL);
+        if (text.includes("来晚啦...文件取消分享了")) {
+            throw new LanzouAPIError("文件已取消分享");
+        }
         ajax = await fetchJSON("https://upload.lanzouj.com/ajaxm.php", {
             headers: {
                 "content-type": "application/x-www-form-urlencoded",
                 origin: new URL(shareURL).origin,
                 referer: shareURL,
+                ...headersObj,
             },
             body: text.match(/data\W+:\W+'(action=downprocess&sign=[^&]+&p=)'/)[1] + password,
             method: "POST",
         });
-        if (ajax.zt) {
+        if (ajax.zt === 1) {
             const down_url = ajax.dom + "/file/" + ajax.url;
             return { zt: 1, info: await downloadRedirect(down_url), text: null };
         } else {
@@ -157,8 +150,8 @@ const isFile: (filePath: string) => Promise<boolean> = async (filePath) =>
         .then((stat) => stat.isFile())
         .catch((_) => false);
 
+export { isFileExists, isFile };
 export { fetch, fetchJSON, objToURL, LanzouAPIError };
 export { getPasswordShareInfo, getPasswordShareLink, getShareLink, getShareInfo };
 export { basename as getBasename } from "path";
 export { createReadStream } from "fs";
-export { isFileExists, isFile };

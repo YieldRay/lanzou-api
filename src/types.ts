@@ -53,10 +53,10 @@ interface infoFolder extends folder {
     new_url: string;
 }
 
-interface response<info, text> {
-    zt: 0 | 1;
-    info: info;
-    text: text;
+interface response<Info, Text> {
+    zt: number;
+    info: Info;
+    text: Text;
 }
 
 type anyResp = response<any, any>;
@@ -89,6 +89,7 @@ type shareResp = response<shareInfo | null, Error | null>;
 type linkResp = response<string | null, Error | null>;
 
 export {
+    response,
     anyResp,
     uploadFileResp,
     createFolderResp,

@@ -17,30 +17,42 @@ $ npm run doc # 生成文档
 
 # 使用
 
-在 https://pc.woozooo.com/mydisk.php 获取 cookie，有效期约两天
+在 https://pc.woozooo.com/mydisk.php 获取 cookie，有效期约两天  
+基于 Promise 的 API
 
 ```js
 import LanzouAPI from "./lib/lanzou.js";
-LanzouAPI.queryShareLink("https://upload.lanzouj.com/iYA4q01oui7g", "passwd").then(console.log);
+LanzouAPI.queryShareLink("https://xxxxxx.lanzouj.com/xxxxxx", "passwd").then(console.log);
 const lanzou = new LanzouAPI(cookie);
 lanzou.getFolders().then(console.log);
 // more...
 ```
 
-正常情况下所有的 API 都不会抛出异常且返回以下接口  
-接口仅在传入错误参数时才抛出异常  
 蓝奏云的接口有点混乱，但一般来说 info 表示操作结果或返回值，text 提供额外信息或 null  
-./src/types.ts 已经对所有返回值进行了描述
+./src/types.ts 已经对所有返回值进行了描述  
+操作成功(即 zt == 1)时返回值符合接口，失败时不符合，参见以下说明  
+**正常情况下所有的 API 都不会抛出异常且返回以下接口**
 
 ```ts
 interface {
-    zt: 0 | 1; // 1成功 0失败
+    zt: number; // 状态码： 0失败  1成功 等等
     info; // 成功时为操作结果或返回值，失败时返回失败信息
     text; // 成功时可能返回额外信息，失败时返回Error对象（本程序扩展）
 }
 ```
 
 失败时可以通过检测 text 来获取程序捕获的异常
+
+```js
+const { zt, info, text } = await api;
+if (zt === 1) {
+    // success
+} else {
+    if (text instanceof Error) {
+        // ...
+    }
+}
+```
 
 ## 文档
 
