@@ -1,7 +1,7 @@
 {
   "type": "module",
   "name": "lanzou-api",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "main": "lib/lanzou.js",
   "scripts": {
     "test": "node test.js",

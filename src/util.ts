@@ -47,6 +47,10 @@ async function downloadRedirect(link: string): Promise<string> {
 async function getShareInfo(shareURL: string): Promise<shareResp> {
     const text = await fetchText(shareURL);
     try {
+        if (text.includes(`placeholder="输入密码"`)) {
+            // 识别为加密的文件，查询加密文件信息不需要密码
+            return getPasswordShareInfo(shareURL, "");
+        }
         const title = text.match(/<title>([^<]+)<\/title>/)[1].replace(" - 蓝奏云", "");
         const size = text.match(/<span class="p7">文件大小：<\/span>([^<]+)<br>/)[1];
         const time = text.match(/<span class="p7">上传时间：<\/span>([^<]+)<br>/)?.[1] || "unknown";
@@ -64,6 +68,10 @@ async function getShareInfo(shareURL: string): Promise<shareResp> {
 async function getShareLink(shareURL: string): Promise<linkResp> {
     try {
         const text = await fetchText(shareURL);
+        if (text.includes(`placeholder="输入密码"`)) {
+            // 识别为加密的文件，查询加密文件信息不需要密码
+            return { zt: 0, info: "请输入密码", text: null };
+        }
         const referer =
             new URL(shareURL).origin + text.match(/<iframe class="ifr2" name="(?:\d{2,})" src="(\/fn\?[^"]+)"/)[1];
         const encryptPage = await fetchText(referer);
