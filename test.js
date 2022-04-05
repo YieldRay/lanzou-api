@@ -5,9 +5,16 @@ cookie
 `.trim();
 
 const lanzou = new LanzouAPI(cookie);
+LanzouAPI.queryShareInfo("https://upload.lanzouj.com/ii5ZQ01qmpqb").then(({ zt, info }) => {
+    if (zt === 1) console.log(info);
+});
+LanzouAPI.queryShareLink("https://upload.lanzouj.com/ii5ZQ01qmpqb", "pass").then((resp) => {
+    console.log(resp);
+});
+LanzouAPI.queryShareLink("https://upload.lanzouj.com/ii5ZQ01qmpqb", "wrong").then((resp) => {
+    console.log(resp);
+});
 // lanzou.uploadFile(4999410, "test.zip").then(console.log);
-LanzouAPI.queryShareInfo("https://upload.lanzouj.com/ii5ZQ01qmpqb").then(console.log);
-LanzouAPI.queryShareLink("https://upload.lanzouj.com/ii5ZQ01qmpqb").then(console.log);
 // lanzou.createFolder().then(({ zt, info, text }) => {
 //     console.log(zt, info, text);
 //     if (zt) {

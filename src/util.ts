@@ -37,6 +37,7 @@ function objToURL(obj: object): string {
 }
 
 async function downloadRedirect(link: string): Promise<string> {
+    // 获取真实下载链接
     return await (fetch as any)(link, {
         headers: headersObj,
         body: null,
@@ -136,10 +137,12 @@ async function getPasswordShareLink(shareURL: string, password: string): Promise
             method: "POST",
         });
         if (ajax.zt === 1) {
+            // 请求获取下载链接，成功
             const down_url = ajax.dom + "/file/" + ajax.url;
-            return { zt: 1, info: await downloadRedirect(down_url), text: null };
+            return { zt: 1, info: await downloadRedirect(down_url), text: ajax.inf };
         } else {
-            return ajax;
+            // 失败
+            return { zt: 0, info: "密码不正确", text: ajax.inf };
         }
     } catch (e) {
         return { zt: 0, info: e.message, text: e };

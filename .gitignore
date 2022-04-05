@@ -1,3 +1,5 @@
-/node_modules
-/doc
-/lib
+node_modules/
+doc/
+lib/
+build/
+dist/
