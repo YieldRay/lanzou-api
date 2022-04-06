@@ -139,14 +139,16 @@ async function queryShareFolderWithPassword(
 	pgs =1;
         */
         // pgs =1
-        const ib4cdh = findByRE(text, /var ib4cdh = '([^']+)';/);
-        const ih2ofa = findByRE(text, /var ih2ofa = '([^']+)';/);
+        const part = findTextBetween(text, "var pgs;", "pgs =");
+        const [part1, key1, val1] = part.match(/var (\w+) = '(\d+)';/);
+        const [part2, key2, val2] = part.replace(part1, "").match(/var (\w+) = '(\w+)';/);
+
         const jsonBody = findTextBetween(text, "data : ", "dataType : 'json',")
             .replace("},", "}")
-            .replace("'pwd':pwd", `'pwd':"${password}"`)
             .replace("pgs", String(pgs))
-            .replace("ib4cdh", `"${ib4cdh}"`)
-            .replace("ih2ofa", `"${ih2ofa}"`)
+            .replace(key1, `"${val1}"`)
+            .replace(key2, `"${val2}"`)
+            .replace("'pwd':pwd", `'pwd':"${password}"`)
             .replace(/'/g, '"');
         const ajax = await fetchJSON("https://upload.lanzouj.com/filemoreajax.php", {
             headers: {

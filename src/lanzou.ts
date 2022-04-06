@@ -56,7 +56,7 @@ class LanzouAPI {
     /**
      * @description 判断文件分享页的类型
      * @param url 分享链接
-     * @returns 返回 {type: "file"|"folder"|null, requirePassword: true|false}
+     * @returns 返回 {type: "file"|"folder"|"null", requirePassword: true|false}
      */
     static getTypeOfShareLink = getTypeOfShareLink;
 

@@ -12,7 +12,7 @@ class LanzouAPIError extends Error {
 class CacheQueue<K, V> {
     protected array: [K, V][] = [];
     protected capacity: number;
-    constructor(capacity = 5) {
+    constructor(capacity = 8) {
         this.capacity = capacity;
     }
     public has(key: K): boolean {
@@ -53,7 +53,8 @@ class CacheQueue<K, V> {
         return this.array.map(([, v]) => v);
     }
 }
-const cacheQueue = new CacheQueue<RequestInfo, string>(10);
+
+const cacheQueue = new CacheQueue<RequestInfo, string>(16);
 async function fetchText(...args: [RequestInfo, RequestInit?]): Promise<string> {
     // 请求会缓存
     if (cacheQueue.has(args[0])) {
