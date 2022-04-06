@@ -1,6 +1,14 @@
-import { fetchJSON, objToURL, LanzouAPIError } from "./util.js";
-import { getPasswordShareInfo, getPasswordShareLink, getShareLink, getShareInfo } from "./util.js";
-import { getBasename, isFileExists } from "./util.js";
+import { fetchJSON, objToURL, LanzouAPIError, isShareLink, getTypeOfShareLink } from "./utils.js";
+import { getBasename, isFileExists } from "./utils.js";
+import {
+    queryShareFileLink,
+    queryShareFileLinkWithPassword,
+    queryShareFileInfo,
+    queryShareFileInfoWithPassword,
+    queryShareFolder,
+    queryShareFolderWithPassword,
+} from "./query.js";
+
 import { allowList, headersObj } from "./data.js";
 import { FormData, fileFromSync } from "node-fetch";
 // 实测 fileFromSync 性能比 fs.createReadStream(from-data库) 更好
@@ -16,8 +24,6 @@ import {
     moveFileTargetResp,
     moveFileActionResp,
     passwordResp,
-    shareResp,
-    linkResp,
 } from "./types";
 
 class LanzouAPI {
@@ -41,11 +47,18 @@ class LanzouAPI {
     }
 
     /**
-     * @description 判断是否为蓝奏云文件分享页链接
+     * @description 判断是否为蓝奏云文件分享页链接，请求会进行一定的缓存
+     * @param url 分享链接
+     * @returns 布尔值，是否为蓝奏云文件分享页链接
      */
-    static isShareLink(url: string): boolean {
-        return /https?:\/\/[A-Za-z0-9]+\.lanzou\w\.com\/[A-Za-z0-9]+/.test(url);
-    }
+    static isShareLink = isShareLink;
+
+    /**
+     * @description 判断文件分享页的类型
+     * @param url 分享链接
+     * @returns 返回 {type: "file"|"folder"|null, requirePassword: true|false}
+     */
+    static getTypeOfShareLink = getTypeOfShareLink;
 
     /**
      * @description 生成随机分享密码
@@ -341,33 +354,13 @@ class LanzouAPI {
             return { zt: 0, info: e.message, text: e };
         }
     }
-    /**
-     * @description 获取蓝奏云文件分享页信息
-     * @param shareURL 蓝奏云文件分享页链接
-     * @param password 分享密码，传入*任意*密码时将查询加密文件分享页信息，否则查询非加密文件分享页信息
-     * @returns 成功值 {"zt":1,"info":{title,size,time,user,system,description},"text":null}
-     */
-    static async queryShareInfo(shareURL: string, password?: string): Promise<shareResp> {
-        if (password) {
-            return await getPasswordShareInfo(shareURL, password);
-        } else {
-            return await getShareInfo(shareURL);
-        }
-    }
 
-    /**
-     * @description 获取蓝奏云文件分享的实际下载链接
-     * @param shareURL 蓝奏云文件分享页链接
-     * @param password 分享密码，传入正确密码时将查询加密文件分享页信息，否则查询非加密文件分享页信息
-     * @returns 成功值 {"zt":1,"info":"真实下载链接","text":null}
-     */
-    static async queryShareLink(shareURL: string, password?: string): Promise<linkResp> {
-        if (password) {
-            return await getPasswordShareLink(shareURL, password);
-        } else {
-            return await getShareLink(shareURL);
-        }
-    }
+    static queryShareFileLink = queryShareFileLink;
+    static queryShareFileLinkWithPassword = queryShareFileLinkWithPassword;
+    static queryShareFileInfo = queryShareFileInfo;
+    static queryShareFileInfoWithPassword = queryShareFileInfoWithPassword;
+    static queryShareFolder = queryShareFolder;
+    static queryShareFolderWithPassword = queryShareFolderWithPassword;
 }
 
 export default LanzouAPI;

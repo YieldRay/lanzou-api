@@ -64,8 +64,6 @@ type anyResp = response<any, any>;
 type uploadFileResp = response<string, uploadFile[]>;
 type listFileResp = response<any[], listFile[]>; // 目前蓝奏云返回的是空数组
 type listFolderResp = response<any[], listFolder[]>; // 目前蓝奏云返回的是空数组
-type shareFileResp = response<shareFile, null>;
-type shareFolderResp = response<shareFolder, null>;
 
 type operateResp = response<string, null>;
 type createFolderResp = response<string, string>;
@@ -74,19 +72,36 @@ type passwordResp = response<string, number>;
 type simpleFolder = { folder_name: string; foldr_id: string };
 type moveFileTargetResp = response<simpleFolder[], null>;
 type moveFileActionResp = response<string, null>;
+// 分享自己的文件
+type shareFileResp = response<shareFile, null>;
+type shareFolderResp = response<shareFolder, null>;
 
-interface shareInfo {
-    title: string;
-    size: string;
-    time: string;
-    user: string;
-    system: string;
-    description: string;
+//  查询分享文件夹，信息文件夹没有嵌套
+interface queryShareFolderInfo {
+    name: string;
+    time: string; // 时间不是详细时间，仅供展示用
+    files: {
+        link: string; // 分享链接
+        name: string;
+        size: string;
+        time: string; // 时间不是详细时间，仅供展示用
+    }[];
 }
 
-type shareResp = response<shareInfo | null, Error | null>;
+// 查询分享文件信息
+interface queryShareFileInfo {
+    name: string;
+    size: string;
+    time: string; // 时间不是详细时间，仅供展示用
+    user?: string;
+    system?: string;
+    description?: string;
+}
+
+type queryShareFileResp = response<queryShareFileInfo | string | null, Error | null>;
+type queryShareFolderResp = response<queryShareFolderInfo | string | null, Error | null>;
 // {zt: 0|1, info: 成功数据|null, text: null|Error}
-type linkResp = response<string | null, Error | null>;
+type queryShareLinkResp = response<string | null, Error | null>;
 
 export {
     listFile,
@@ -106,7 +121,9 @@ export {
     moveFileTargetResp,
     moveFileActionResp,
     passwordResp,
-    shareResp,
-    shareInfo,
-    linkResp,
+    queryShareLinkResp,
+    queryShareFileInfo,
+    queryShareFolderInfo,
+    queryShareFileResp,
+    queryShareFolderResp,
 };

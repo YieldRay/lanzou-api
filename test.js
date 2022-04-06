@@ -5,15 +5,18 @@ cookie
 `.trim();
 
 const lanzou = new LanzouAPI(cookie);
-LanzouAPI.queryShareInfo("https://upload.lanzouj.com/ii5ZQ01qmpqb").then(({ zt, info }) => {
-    if (zt === 1) console.log(info);
+LanzouAPI.queryShareFileInfoWithPassword("https://upload.lanzouj.com/i95j302pbxeb").then(({ zt, info }) => {
+    console.log(info);
 });
-LanzouAPI.queryShareLink("https://upload.lanzouj.com/ii5ZQ01qmpqb", "pass").then((resp) => {
+
+LanzouAPI.queryShareFileLinkWithPassword("https://upload.lanzouj.com/i95j302pbxeb", "pass").then((resp) => {
     console.log(resp);
 });
-LanzouAPI.queryShareLink("https://upload.lanzouj.com/ii5ZQ01qmpqb", "wrong").then((resp) => {
+
+LanzouAPI.queryShareFolderWithPassword("https://upload.lanzouj.com/b036v4cxa", "3260").then((resp) => {
     console.log(resp);
 });
+
 // lanzou.uploadFile(4999410, "test.zip").then(console.log);
 // lanzou.createFolder().then(({ zt, info, text }) => {
 //     console.log(zt, info, text);
