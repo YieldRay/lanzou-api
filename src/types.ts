@@ -53,13 +53,13 @@ interface shareFolder extends folder {
     new_url: string;
 }
 
-interface response<Info, Text> {
+interface _response<Info, Text> {
     zt: number;
     info: Info;
     text: Text;
 }
-
-type anyResp = response<any, any>;
+type anyResp = _response<any, any>;
+type response<Info, Text> = _response<Info | Error, Text | string | null>; // response基本类型
 
 type uploadFileResp = response<string, uploadFile[]>;
 type listFileResp = response<any[], listFile[]>; // 目前蓝奏云返回的是空数组
@@ -98,10 +98,10 @@ interface queryShareFileInfo {
     description?: string;
 }
 
-type queryShareFileResp = response<queryShareFileInfo | string | null, Error | null>;
-type queryShareFolderResp = response<queryShareFolderInfo | string | null, Error | null>;
-// {zt: 0|1, info: 成功数据|null, text: null|Error}
-type queryShareLinkResp = response<string | null, Error | null>;
+type queryShareFileResp = response<queryShareFileInfo, string>;
+type queryShareFolderResp = response<queryShareFolderInfo | Error, string>;
+// {zt: 0|1, info: 成功数据|Error, text: null|string}
+type queryShareLinkResp = response<string, string>;
 
 export {
     listFile,

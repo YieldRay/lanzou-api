@@ -74,13 +74,15 @@ class LanzouAPI {
     private async fetchLanzou(bodyObj: object): Promise<anyResp> {
         try {
             const json = await fetchJSON("https://pc.woozooo.com/doupload.php", {
-                headers: {
-                    accept: "application/json, text/javascript, */*; q=0.01",
-                    "cache-control": "no-cache",
-                    "content-type": "application/x-www-form-urlencoded; charset=UTF-8",
-                    cookie: this.cookie,
-                    ...headersObj,
-                },
+                headers: Object.assign(
+                    {
+                        accept: "application/json, text/javascript, */*; q=0.01",
+                        "cache-control": "no-cache",
+                        "content-type": "application/x-www-form-urlencoded; charset=UTF-8",
+                        cookie: this.cookie,
+                    },
+                    headersObj
+                ),
                 body: objToURL(bodyObj),
                 method: "POST",
             });
@@ -333,7 +335,7 @@ class LanzouAPI {
             }
             if (!folder_id) folder_id = -1;
             const filename = getBasename(filepath);
-            if (!LanzouAPI.allowList.includes(filename.split(".").pop())) {
+            if (!filename.includes(".") || !LanzouAPI.allowList.includes((filename.split(".") as any[]).pop())) {
                 throw new LanzouAPIError("文件类型不允许上传");
             }
             const fd = new FormData();

@@ -58,7 +58,7 @@ const cacheQueue = new CacheQueue<RequestInfo, string>(16);
 async function fetchText(...args: [RequestInfo, RequestInit?]): Promise<string> {
     // 请求会缓存
     if (cacheQueue.has(args[0])) {
-        return cacheQueue.get(args[0]);
+        return cacheQueue.get(args[0]) as string;
     }
     const resp = await (fetch as any)(...args);
     if (resp.ok) {
@@ -80,7 +80,7 @@ async function fetchJSON(...args: [RequestInfo, RequestInit?]): Promise<any> {
     }
 }
 
-function objToURL(obj: object): string {
+function objToURL(obj: any): string {
     const sp = new URLSearchParams();
     for (let i in obj) {
         sp.append(i, obj[i]);
@@ -88,12 +88,12 @@ function objToURL(obj: object): string {
     return sp.toString();
 }
 
-function findByRE(str: string, re: RegExp): string | null {
+function findByRE(str: string, re: RegExp): string | undefined {
     const match = str.match(re);
     if (match) {
         return match[1];
     } else {
-        return null;
+        return undefined;
     }
 }
 
@@ -124,7 +124,7 @@ interface shareType {
 
 async function getTypeOfShareLink(url: string): Promise<shareType> {
     // 为了减少请求次数，传入html
-    if (!isShareLink(url)) return { type: null, requirePassword: false };
+    if (!isShareLink(url)) return { type: "null", requirePassword: false };
     const html: string = await fetchText(url);
     if (
         html.includes(`<div class="off"><div class="off0"><div class="off1"></div></div>来晚啦...文件取消分享了</div>`)

@@ -2,7 +2,8 @@
     "compilerOptions": {
         "target": "es2020",
         "moduleResolution": "node",
-        "strict": false,
+        "useUnknownInCatchVariables": false,
+        "strict": true,
         "declaration": true,
         "declarationDir": "lib/types",
         "outDir": "lib",

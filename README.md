@@ -2,15 +2,15 @@
 
 蓝奏云 API node.js 版本，目前实现了大部分功能，推荐 node.js >= 14
 
-typescript 编写，生成 d.ts 方便开发和访问接口  
 理论上程序能够容易地转换为 Deno 版本和浏览器版本（浏览器需解除 fetch 限制）
 
-仅供测试，勿用于非法行为
+typescript 编写，仅供学习，勿用于非法行为
 
 # 构建
 
 ```sh
-$ tsc
+$ npm install --production
+$ tsc # 需要自行安装typescript
 
 $ npm run doc # 生成文档
 ```
@@ -22,7 +22,7 @@ $ npm run doc # 生成文档
 
 ```js
 import LanzouAPI from "./lib/lanzou.js";
-LanzouAPI.queryShareLink("https://xxxxxx.lanzouj.com/xxxxxx", "passwd").then(console.log);
+LanzouAPI.queryShareFileInfoWithPassword("https://upload.lanzouj.com/i95j302pbxeb").then(console.log);
 const lanzou = LanzouAPI.of(cookie); // new LanzouAPI(cookie)
 lanzou.getFolders().then(({ zt, info, text }) => {
     if (zt === 1) {
@@ -36,28 +36,26 @@ lanzou.getFolders().then(({ zt, info, text }) => {
 
 蓝奏云的接口有点混乱，但一般来说 info 表示操作结果或返回值，text 提供额外信息或 null
 
-./src/types.ts 已经对所有返回值进行了描述
-
-操作成功(即 zt == 1)时返回值符合接口，失败时不符合，参见以下说明
+`./src/types.ts` 已经对所有返回值进行了描述
 
 **正常情况下所有的 API 都不会抛出异常且返回以下接口**
 
 ```ts
-interface {
-    zt: number; // 状态码： 0失败  1成功 等等
-    info; // 成功时为操作结果或返回值，失败时返回失败信息
-    text; // 成功时可能返回额外信息，失败时返回Error对象（本程序扩展）
+interface<Info> {
+    zt: number; // 状态码： 0 失败  1 成功 等等
+    info: Info | Error; // 成功时为操作结果或返回值，失败时返回 Error 对象
+    text string | null; // 成功时可能返回额外信息或 null，失败时失败信息（字符串）
 }
 ```
 
-失败时可以通过检测 text 来获取程序捕获的异常
+失败时可以通过检测 `info` 来获取程序捕获的异常
 
 ```js
 const { zt, info, text } = await lanzou.getFolders();
 if (zt === 1) {
     // success
 } else {
-    if (text instanceof Error) {
+    if (info instanceof Error) {
         // ...
     }
 }
