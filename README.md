@@ -10,7 +10,7 @@ typescript 编写，仅供学习，勿用于非法行为
 
 ```sh
 $ npm install --production
-$ tsc # 需要自行安装typescript
+$ npx tsc
 
 $ npm run doc # 生成文档
 ```
@@ -22,7 +22,7 @@ $ npm run doc # 生成文档
 
 ```js
 import LanzouAPI from "./lib/lanzou.js";
-LanzouAPI.queryShareFileInfoWithPassword("https://upload.lanzouj.com/i95j302pbxeb").then(console.log);
+LanzouAPI.queryShareFileInfoWithPassword("https://upload.lanzouj.com/i95j302p", "bxeb").then(console.log);
 const lanzou = LanzouAPI.of(cookie); // new LanzouAPI(cookie)
 lanzou.getFolders().then(({ zt, info, text }) => {
     if (zt === 1) {
@@ -38,13 +38,13 @@ lanzou.getFolders().then(({ zt, info, text }) => {
 
 `./src/types.ts` 已经对所有返回值进行了描述
 
-**正常情况下所有的 API 都不会抛出异常且返回以下接口**
+**正常情况下所有的 API 都不会抛出异常（即使是网络错误）且返回以下接口**
 
 ```ts
 interface<Info> {
     zt: number; // 状态码： 0 失败  1 成功 等等
     info: Info | Error; // 成功时为操作结果或返回值，失败时返回 Error 对象
-    text string | null; // 成功时可能返回额外信息或 null，失败时失败信息（字符串）
+    text string | null; // 成功时可能返回额外信息或 null，失败时返回失败信息（字符串）
 }
 ```
 

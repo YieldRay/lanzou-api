@@ -3,3 +3,4 @@ doc/
 lib/
 build/
 dist/
+.env

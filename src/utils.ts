@@ -123,8 +123,8 @@ interface shareType {
 }
 
 async function getTypeOfShareLink(url: string): Promise<shareType> {
-    // 为了减少请求次数，传入html
     if (!isShareLink(url)) return { type: "null", requirePassword: false };
+    // 为了减少请求次数，传入html
     const html: string = await fetchText(url);
     if (
         html.includes(`<div class="off"><div class="off0"><div class="off1"></div></div>来晚啦...文件取消分享了</div>`)

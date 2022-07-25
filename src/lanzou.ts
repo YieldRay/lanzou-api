@@ -218,7 +218,7 @@ class LanzouAPI {
     /**
      * @description 通过文件id获取文件的名称
      * @param file_id 文件id
-     * @returns {"zt":1,"info":"文件名称","text":""}
+     * @returns 成功值 {"zt":1,"info":"文件名称","text":""}
      */
     async getFileNameByID(file_id: number): Promise<anyResp> {
         return await this.fetchLanzou({
