@@ -17,7 +17,7 @@ $ npm run doc # 生成文档
 
 # 使用
 
-在 https://pc.woozooo.com/mydisk.php 获取 cookie，有效期约两天  
+在 https://pc.woozooo.com/mydisk.php 获取 cookie，有效期未知
 基于 Promise 的 API，程序仅对蓝奏云请求接口做了简单的封装，返回数据大致为蓝奏云接口原始数据
 
 ```js
