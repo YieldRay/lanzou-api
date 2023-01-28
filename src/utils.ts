@@ -1,5 +1,5 @@
 import fetch from "node-fetch";
-import fs from "fs";
+import fs from "node:fs";
 import { headersObj } from "./data.js";
 
 class LanzouAPIError extends Error {
@@ -117,12 +117,12 @@ function isShareLink(url: string): boolean {
     return /https?:\/\/[A-Za-z0-9]+\.lanzou\w\.com\/[A-Za-z0-9]+/.test(url);
 }
 
-interface shareType {
+interface ShareType {
     type: "file" | "folder" | "null"; // null表示文件取消分享
     requirePassword: boolean;
 }
 
-async function getTypeOfShareLink(url: string): Promise<shareType> {
+async function getTypeOfShareLink(url: string): Promise<ShareType> {
     if (!isShareLink(url)) return { type: "null", requirePassword: false };
     // 为了减少请求次数，传入html
     const html: string = await fetchText(url);

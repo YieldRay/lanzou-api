@@ -17,7 +17,7 @@ LanzouAPI.queryShareFolderWithPassword("https://upload.lanzouj.com/b036v4cxa", "
     console.log(resp);
 });
 
-// lanzou.uploadFile(4999410, "test.zip").then(console.log);
+lanzou.uploadFile(4999410, "test.zip").then(console.log);
 
 lanzou.createFolder().then(({ zt, info, text }) => {
     // 测试：创建并删除文件夹

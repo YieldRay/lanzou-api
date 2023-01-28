@@ -4,8 +4,6 @@
 
 理论上程序能够容易地转换为 Deno 版本和浏览器版本（浏览器需解除 fetch 限制）
 
-typescript 编写，仅供学习，勿用于非法行为
-
 # 构建
 
 ```sh
@@ -23,7 +21,7 @@ $ npm run doc # 生成文档
 ```js
 import LanzouAPI from "./lib/lanzou.js";
 LanzouAPI.queryShareFileInfoWithPassword("https://upload.lanzouj.com/i95j302p", "bxeb").then(console.log);
-const lanzou = LanzouAPI.of(cookie); // new LanzouAPI(cookie)
+const lanzou = new LanzouAPI(cookie);
 lanzou.getFolders().then(({ zt, info, text }) => {
     if (zt === 1) {
         console.log(info);

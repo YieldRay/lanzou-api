@@ -9,9 +9,9 @@ import {
     LanzouAPIError,
 } from "./utils.js";
 import { headersObj } from "./data.js";
-import { queryShareFileResp, queryShareFolderResp, queryShareLinkResp } from "./types";
+import { QueryShareFileResp, QueryShareFolderResp, QueryShareLinkResp } from "./types";
 
-async function queryShareFileInfo(shareURL: string): Promise<queryShareFileResp> {
+async function queryShareFileInfo(shareURL: string): Promise<QueryShareFileResp> {
     try {
         const text = await fetchText(shareURL);
         const { type, requirePassword } = await getTypeOfShareLink(shareURL);
@@ -31,7 +31,7 @@ async function queryShareFileInfo(shareURL: string): Promise<queryShareFileResp>
     }
 }
 
-async function queryShareFileLink(shareURL: string): Promise<queryShareLinkResp> {
+async function queryShareFileLink(shareURL: string): Promise<QueryShareLinkResp> {
     try {
         const text = await fetchText(shareURL);
         const { type, requirePassword } = await getTypeOfShareLink(shareURL);
@@ -69,8 +69,10 @@ async function queryShareFileLink(shareURL: string): Promise<queryShareLinkResp>
     }
 }
 
-// 查询信息无需密码
-async function queryShareFileInfoWithPassword(shareURL: string): Promise<queryShareFileResp> {
+/**
+ * 查询信息无需密码
+ */
+async function queryShareFileInfoWithPassword(shareURL: string): Promise<QueryShareFileResp> {
     try {
         const text = await fetchText(shareURL);
         const { type, requirePassword } = await getTypeOfShareLink(shareURL);
@@ -90,7 +92,7 @@ async function queryShareFileInfoWithPassword(shareURL: string): Promise<querySh
     }
 }
 
-async function queryShareFileLinkWithPassword(shareURL: string, password: string): Promise<queryShareLinkResp> {
+async function queryShareFileLinkWithPassword(shareURL: string, password: string): Promise<QueryShareLinkResp> {
     try {
         const text = await fetchText(shareURL);
         const { type, requirePassword } = await getTypeOfShareLink(shareURL);
@@ -125,7 +127,7 @@ async function queryShareFolderWithPassword(
     shareURL: string,
     password: string,
     pgs = 1
-): Promise<queryShareFolderResp> {
+): Promise<QueryShareFolderResp> {
     try {
         const text = await fetchText(shareURL);
         const { type, requirePassword } = await getTypeOfShareLink(shareURL);
@@ -177,8 +179,10 @@ async function queryShareFolderWithPassword(
     }
 }
 
-async function queryShareFolder(shareURL: string): Promise<queryShareFolderResp> {
-    // !TODO 暂未实现
+/**
+ * !TODO 暂未实现
+ */
+async function queryShareFolder(shareURL: string): Promise<QueryShareFolderResp> {
     try {
         const text = await fetchText(shareURL);
         const { type, requirePassword } = await getTypeOfShareLink(shareURL);
