@@ -1,33 +1,32 @@
 {
-  "type": "module",
-  "name": "lanzou-api",
-  "version": "0.2.0",
-  "main": "lib/lanzou.js",
-  "scripts": {
-    "test": "node test.js",
-    "build": "tsc",
-    "doc": "typedoc src/lanzou.ts src/types.ts --out ./doc",
-    "rollup": "rollup lib/lanzou.js --file lib/lanzou.cjs --format cjs"
-  },
-  "keywords": [],
-  "author": "YieldRay",
-  "license": "ISC",
-  "description": "Lanzou API",
-  "devDependencies": {
-    "@types/node": "^18.11.18",
-    "dotenv": "^16.0.3",
-    "typedoc": "^0.23.24",
-    "typescript": "^4.9.4"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/YieldRay/lanzou-api.git"
-  },
-  "bugs": {
-    "url": "https://github.com/YieldRay/lanzou-api/issues"
-  },
-  "homepage": "https://github.com/YieldRay/lanzou-api#readme",
-  "dependencies": {
-    "node-fetch": "^3.3.0"
-  }
+    "type": "module",
+    "name": "lanzou-api",
+    "version": "0.3.0",
+    "main": "lib/lanzou.js",
+    "types": "lib/types/lanzou.d.ts",
+    "scripts": {
+        "test": "tsx test.ts",
+        "build": "tsup src/lanzou.ts --out-dir=lib --format=esm && tsc",
+        "esbuild": "esbuild src/lanzou.ts --bundle --outfile=lib/bundle.js --platform=node --format=esm --minify",
+        "doc": "typedoc src/lanzou.ts src/types.ts --out ./doc"
+    },
+    "keywords": [],
+    "author": "YieldRay",
+    "license": "ISC",
+    "description": "Lanzou API",
+    "devDependencies": {
+        "@types/node": "^20.9.4",
+        "dotenv": "^16.3.1",
+        "tsup": "^8.0.1",
+        "typedoc": "^0.25.3",
+        "typescript": "^5.3.2"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/YieldRay/lanzou-api.git"
+    },
+    "bugs": {
+        "url": "https://github.com/YieldRay/lanzou-api/issues"
+    },
+    "homepage": "https://github.com/YieldRay/lanzou-api#readme"
 }

@@ -1,11 +1,15 @@
-import LanzouAPI from "./lib/lanzou.js";
+import LanzouAPI from "./src/lanzou";
 import "dotenv/config";
 
-const cookie = process.env.LANZOU_COOKIE;
+const cookie = process.env.LANZOU_COOKIE!;
 
 const lanzou = new LanzouAPI(cookie);
 
-LanzouAPI.queryShareFileInfoWithPassword("https://upload.lanzouj.com/i95j302pbxeb").then(({ zt, info }) => {
+LanzouAPI.queryShareFileLink("https://upload.lanzoue.com/iPjYI1fmhn1a").then(({ zt, info }) => {
+    console.log(info);
+});
+
+LanzouAPI.queryShareFileInfoWithPassword("https://upload.lanzoue.com/iPjYI1fmhn1a").then(({ zt, info }) => {
     console.log(info);
 });
 

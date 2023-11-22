@@ -1,5 +1,5 @@
 import { fetchJSON, objToURL, LanzouAPIError, isShareLink, getTypeOfShareLink } from "./utils.js";
-import { getBasename, isFileExists } from "./utils.js";
+import { getBasename, isFileExists, readWebFile } from "./utils.js";
 import {
     queryShareFileLink,
     queryShareFileLinkWithPassword,
@@ -8,10 +8,7 @@ import {
     queryShareFolder,
     queryShareFolderWithPassword,
 } from "./query.js";
-
 import { allowList, headersObj } from "./data.js";
-import { FormData, fileFrom } from "node-fetch";
-// 实测 fileFromSync 性能比 fs.createReadStream(from-data库) 更好
 import {
     LanzouResp,
     UploadFileResp,
@@ -391,8 +388,9 @@ class LanzouAPI {
             fd.append("ve", "2");
             fd.append("id", "WU_FILE_0");
             fd.append("name", filename);
+
             fd.append("folder_id_bb_n", String(folder_id));
-            fd.append("upload_file", await fileFrom(filepath));
+            fd.append("upload_file", await readWebFile(filepath));
             return await fetchJSON("https://pc.woozooo.com/fileup.php", {
                 headers: {
                     cookie: this.cookie,

@@ -1,5 +1,5 @@
-import fetch from "node-fetch";
 import fs from "node:fs";
+import { readFile } from "node:fs/promises";
 import { headersObj } from "./data.js";
 
 class LanzouAPIError extends Error {
@@ -60,9 +60,9 @@ async function fetchText(...args: [RequestInfo, RequestInit?]): Promise<string> 
     if (cacheQueue.has(args[0])) {
         return cacheQueue.get(args[0]) as string;
     }
-    const resp = await (fetch as any)(...args);
+    const resp = await fetch(...args);
     if (resp.ok) {
-        const text = resp.text();
+        const text = await resp.text();
         cacheQueue.set(args[0], text);
         return text;
     } else {
@@ -72,9 +72,9 @@ async function fetchText(...args: [RequestInfo, RequestInit?]): Promise<string> 
 
 async function fetchJSON(...args: [RequestInfo, RequestInit?]): Promise<any> {
     // 请求不会缓存
-    const resp = await (fetch as any)(...args);
+    const resp = await fetch(...args);
     if (resp.ok) {
-        return resp.json();
+        return await resp.json();
     } else {
         throw new LanzouAPIError("网络请求错误 " + resp.statusText);
     }
@@ -167,8 +167,14 @@ const isFile: (filePath: string) => Promise<boolean> = async (filePath) =>
         .then((stat) => stat.isFile())
         .catch((_) => false);
 
+/**
+ * nodejs读取为原生File对象，以支持fetch的formData
+ */
+async function readWebFile(filepath: string) {
+    return new File([(await readFile(filepath)).buffer], filepath);
+}
+
 export { LanzouAPIError, findByRE, isShareLink, getTypeOfShareLink, findTextBetween };
-export { isFileExists, isFile }; // file tools
-export { basename as getBasename } from "path"; // file tools
-export { createReadStream } from "fs";
-export { fetch, fetchJSON, objToURL, fetchText, downloadRedirect }; // network tools
+export { isFileExists, isFile, readWebFile }; // file tools
+export { basename as getBasename } from "node:path"; // file tools
+export { fetchJSON, objToURL, fetchText, downloadRedirect }; // network tools

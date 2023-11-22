@@ -1,16 +1,19 @@
 # Lanzou API
 
-蓝奏云 API node.js 版本，目前实现了大部分功能，推荐 node.js >= 14
+> [!WARNING]  
+> Depracated: 已废弃项目
 
-理论上程序能够容易地转换为 Deno 版本和浏览器版本（浏览器需解除 fetch 限制）
+蓝奏云 API node.js 版本，基于 fetch，零依赖。目前实现了大部分功能，node.js 必须 >= 18
+
+理论上程序能够容易地转换为 Deno 版本和浏览器版本（浏览器需自行处理 CORS 限制）
 
 # 构建
 
 ```sh
-$ npm install --production
-$ npx tsc
+$ npm install
+$ npm run build
 
-$ npm run doc # 生成文档
+$ npm run doc # 可选，生成文档
 ```
 
 # 使用
