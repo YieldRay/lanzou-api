@@ -4,28 +4,37 @@ on:
         branches:
             - main
             - master
+permissions:
+    contents: read
+    pages: write
+    id-token: write
 jobs:
     deploy:
         runs-on: ubuntu-latest
 
         steps:
             - name: Checkout
-              uses: actions/checkout@v2
+              uses: actions/checkout@v4
 
-            - name: Use Node.js
-              uses: actions/setup-node@v2
+            - name: Setup Node.js
+              uses: actions/setup-node@v3
               with:
                   node-version: "18"
                   cache: "npm"
 
-            - name: Install
-              run: npm install --legacy-peer-deps
+            - name: Build doc
+              run: |
+                  npm install --legacy-peer-deps
+                  npx typedoc src/lanzou.ts src/types.ts --out ./doc
 
-            - name: Typedoc
-              run: npx typedoc src/lanzou.ts src/types.ts --out ./doc
+            - name: Setup Pages
+              uses: actions/configure-pages@v3
 
-            - name: Deploy
-              uses: peaceiris/actions-gh-pages@v3
+            - name: Upload artifact
+              uses: actions/upload-pages-artifact@v2
               with:
-                  deploy_key: ${{ secrets.ACTIONS_DEPLOY_KEY }}
-                  publish_dir: ./doc
+                  path: "./doc"
+
+            - name: Deploy to GitHub Pages
+              id: deployment
+              uses: actions/deploy-pages@v2
